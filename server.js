@@ -3,7 +3,7 @@ const fastify = require('fastify')({ logger: false });
 const fastifyPostgres = require('@fastify/postgres');
 const fastifyStatic = require('@fastify/static');
 
-const DB_CONNECTION_STRING = 'postgresql://neondb_owner:npg_E0Ri2lcUIpVw@ep-delicate-base-az7dzspl-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+const DB_CONNECTION_STRING = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_E0Ri2lcUIpVw@ep-delicate-base-az7dzspl-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
 // Register PostgreSQL plugin
 fastify.register(fastifyPostgres, {

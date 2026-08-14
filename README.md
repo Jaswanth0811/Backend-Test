@@ -1,71 +1,107 @@
 # Service Provider Registry API & Web Dashboard
 
-A robust, modern backend API and responsive dashboard built using **Node.js + Fastify + PostgreSQL** and integrated with **Neon Database**.
-
-## Features
-- **Interactive UI:** A sleek, responsive dashboard built with dark mode and glassmorphic aesthetics.
-- **Service Registration (`POST /api/register`):** Register plumbers, electricians, painters, etc., and save them to the cloud database.
-- **Provider Directory (`GET /api/providers`):** Fetch the full list of registered providers.
-- **Specific Lookup (`GET /api/providers/:id`):** Look up individual provider details by their database ID with fallback error handling.
+A robust, modern backend API and responsive dashboard built using **Node.js + Fastify + PostgreSQL** and integrated with **Neon Database** (or your own SQL database).
 
 ---
 
-## Setup & Running the Server
+## Getting Started
 
-### 1. Install Dependencies
-Navigate to the directory and install all required modules:
+### 1. Clone the Repository
+Clone the repository using Git and navigate into the project folder:
+```bash
+git clone https://github.com/Jaswanth0811/Backend-Test.git
+cd Backend-Test
+```
+
+### 2. Install Dependencies
+Install all required Node modules:
 ```bash
 npm install
 ```
 
-### 2. Set Up Database Schema
-Run the database setup script to automatically construct the `service_providers` table inside Neon PostgreSQL:
+---
+
+## Database Configuration (Using Your Own SQL Database)
+
+By default, the application is pre-configured to connect to a Neon cloud PostgreSQL database. To use **your own local or cloud SQL/PostgreSQL database**, follow these steps:
+
+### A. Create a `.env` File
+Create a new file named `.env` in the root of the project:
+```env
+DATABASE_URL=postgresql://username:password@host:port/database_name?sslmode=require
+```
+*(Replace `username`, `password`, `host`, `port`, and `database_name` with your own PostgreSQL details. If your local DB doesn't require SSL, you can remove `?sslmode=require`).*
+
+### B. Run the Database Setup Script
+Use the setup script to construct the `service_providers` table inside your database. 
+
+**Using Node.js 20.6.0+ (reads `.env` automatically):**
 ```bash
-node db-setup.js
+node --env-file=.env db-setup.js
 ```
 
-### 3. Start the Server
-Run the Fastify server:
-```bash
-node server.js
-```
-*You will see the console log: `Server running on port 3000`.*
+**Alternative (setting environment variable manually):**
+- **Linux/macOS:**
+  ```bash
+  DATABASE_URL="your_connection_string" node db-setup.js
+  ```
+- **Windows PowerShell:**
+  ```powershell
+  $env:DATABASE_URL="your_connection_string"
+  node db-setup.js
+  ```
 
 ---
 
-## How to Run & Use Using Google Chrome
+## Running the Server
 
-### Method A: Using the Web Dashboard (Visual UI)
-1. Ensure your server is running (`node server.js`).
-2. Open **Google Chrome**.
-3. Navigate to **`http://localhost:3000`**.
-4. You will see the **MonoApp Registry** dashboard:
-   - **Left Panel:** Enter a name, phone, skill, and city, and click **Submit Registration**.
-   - **Right Panel:** Watch the live directory list update automatically in real-time as providers are added to the database.
+Start the Fastify API server:
 
-### Method B: Querying API Endpoints Directly in Chrome
-You can query the `GET` endpoints directly in the Chrome search bar:
+**Option 1: Using your own database (configured in `.env`):**
+```bash
+node --env-file=.env server.js
+```
+
+**Option 2: Using the default Neon database:**
+```bash
+node server.js
+```
+
+*Once started, you will see the message: `Server running on port 3000`.*
+
+---
+
+## Testing the APIs
+
+You can test the APIs in multiple ways:
+
+### Method A: Using Google Chrome (Interactive UI)
+1. Open **Google Chrome**.
+2. Navigate to **`http://localhost:3000`**.
+3. You will see the **MonoApp Registry** dashboard. Fill out the form on the left to register a provider and see the directory list on the right update in real-time.
+
+### Method B: Running the Automated Test Script
+Open a second terminal window (while the server is running) and execute:
+
+**Option 1: Test with your own database (configured in `.env`):**
+```bash
+node --env-file=.env test-api.js
+```
+
+**Option 2: Test with the default Neon database:**
+```bash
+node test-api.js
+```
+
+### Method C: Manual Testing in Google Chrome
+Enter these URLs in the Chrome address bar to request database records:
 - **List All Providers:** Open `http://localhost:3000/api/providers`
 - **List Provider by ID:** Open `http://localhost:3000/api/providers/1`
-
-### Method C: Testing POST Requests using Chrome DevTools
-If you want to test the `POST /api/register` endpoint without filling out the form, you can do so in the Chrome Console:
-1. Navigate to `http://localhost:3000` in Google Chrome.
-2. Press **`F12`** (or right-click anywhere and select **Inspect**), then click the **Console** tab.
-3. Paste the following JavaScript code and press **Enter**:
-   ```javascript
-   fetch('/api/register', {
-     method: 'POST',
-     headers: { 'Content-Type': 'application/json' },
-     body: JSON.stringify({
-       name: 'Peter Parker',
-       phone: '555-0182',
-       skill: 'Electrician',
-       city: 'Queens'
-     })
-   })
-   .then(res => res.json())
-   .then(data => console.log('Response:', data))
-   .catch(err => console.error('Error:', err));
-   ```
-4. You will see the response returned by Fastify logged directly in the console.
+- **Register via Chrome Console:** Press `F12`, select the **Console** tab, and run:
+  ```javascript
+  fetch('/api/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'Bruce Wayne', phone: '555-0192', skill: 'Electrician', city: 'Gotham' })
+  }).then(res => res.json()).then(console.log);
+  ```
