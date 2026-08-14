@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service Provider Registry</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0b10;
+      --bg-secondary: #12131a;
+      --accent-color: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.15);
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --card-border: rgba(255, 255, 255, 0.05);
+      --input-bg: #1a1b26;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100/vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background glows */
+    .glow-1 {
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      width: 40vw;
+      height: 40vw;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .glow-2 {
+      position: absolute;
+      bottom: -10%;
+      right: -10%;
+      width: 40vw;
+      height: 40vw;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    header {
+      width: 100%;
+      max-width: 1100px;
+      margin-bottom: 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      background: var(--accent-gradient);
+      padding: 0.6rem;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      color: white;
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    main {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      main {
+        grid-template-columns: 420px 1fr;
+      }
+    }
+
+    /* Glassmorphic Panel styling */
+    .panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Form styling */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    input, select {
+      width: 100%;
+      background-color: var(--input-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.8rem 1rem 0.8rem 2.5rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    button {
+      width: 100%;
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      padding: 0.9rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px var(--accent-glow);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    /* Provider list styling */
+    .providers-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .providers-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .providers-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .providers-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .provider-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 15px;
+      padding: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .provider-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(99, 102, 241, 0.3);
+      transform: translateX(4px);
+    }
+
+    .provider-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .skill-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #818cf8;
+    }
+
+    .provider-details h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .provider-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .provider-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .city-badge {
+      background: rgba(168, 85, 247, 0.1);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .no-data {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 3rem 1rem;
+      font-size: 0.95rem;
+    }
+
+    .no-data i {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+      color: var(--accent-color);
+      opacity: 0.5;
+      display: block;
+    }
+
+    /* Toast Notification system */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--bg-secondary);
+      border-left: 4px solid var(--accent-color);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transform: translateY(150%);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+    }
+
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--error); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+      </div>
+      <div>
+        <h1>MonoApp Registry</h1>
+      </div>
+    </div>
+    <div class="status-badge">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Connecting...</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left panel: Registration -->
+    <section class="panel">
+      <h2><i class="fa-solid fa-user-plus" style="color: var(--accent-color);"></i> Register Provider</h2>
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="name" placeholder="John Doe" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-phone"></i>
+            <input type="tel" id="phone" placeholder="+1 (555) 000-0000" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="skill">Primary Skill</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-gears"></i>
+            <select id="skill" required>
+              <option value="" disabled selected>Select a skill</option>
+              <option value="Plumber">Plumber</option>
+              <option value="Electrician">Electrician</option>
+              <option value="Painter">Painter</option>
+              <option value="Carpenter">Carpenter</option>
+              <option value="Mechanic">Mechanic</option>
+              <option value="AC Technician">AC Technician</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="city">City Location</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-location-dot"></i>
+            <input type="text" id="city" placeholder="New York" required>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn">
+          <i class="fa-solid fa-paper-plane"></i> Submit Registration
+        </button>
+      </form>
+    </section>
+
+    <!-- Right panel: Live Providers List -->
+    <section class="panel">
+      <h2><i class="fa-solid fa-users" style="color: #a855f7;"></i> Registered Providers</h2>
+      <div class="providers-list" id="providersList">
+        <div class="no-data">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Loading active database records...
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Custom Alert Toast -->
+  <div class="toast" id="toast">
+    <i id="toastIcon" class="fa-solid"></i>
+    <span id="toastMessage">Success Message</span>
+  </div>
+
+  <script>
+    const baseUrl = window.location.origin;
+    const registerForm = document.getElementById('registerForm');
+    const providersList = document.getElementById('providersList');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const toast = document.getElementById('toast');
+    const toastIcon = document.getElementById('toastIcon');
+    const toastMessage = document.getElementById('toastMessage');
+
+    // Skill icons mapping
+    const skillIcons = {
+      'Plumber': 'fa-faucet',
+      'Electrician': 'fa-bolt-lightning',
+      'Painter': 'fa-paint-roller',
+      'Carpenter': 'fa-hammer',
+      'Mechanic': 'fa-screwdriver-wrench',
+      'AC Technician': 'fa-wind'
+    };
+
+    function showToast(message, type = 'success') {
+      toastMessage.textContent = message;
+      toast.className = `toast ${type} show`;
+      toastIcon.className = `fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}`;
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    async function fetchProviders() {
+      try {
+        const response = await fetch(`${baseUrl}/api/providers`);
+        if (!response.ok) throw new Error('Failed to fetch providers');
+        const result = await response.json();
+        
+        statusDot.style.backgroundColor = 'var(--success)';
+        statusDot.style.boxShadow = '0 0 8px var(--success)';
+        statusText.textContent = 'Connected to Neon';
+
+        renderProviders(result.data || []);
+      } catch (error) {
+        console.error(error);
+        statusDot.style.backgroundColor = 'var(--error)';
+        statusDot.style.boxShadow = '0 0 8px var(--error)';
+        statusText.textContent = 'Database Offline';
+        
+        providersList.innerHTML = `
+          <div class="no-data" style="color: var(--error);">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Unable to connect to database backend
+          </div>
+        `;
+      }
+    }
+
+    function renderProviders(providers) {
+      if (providers.length === 0) {
+        providersList.innerHTML = `
+          <div class="no-data">
+            <i class="fa-solid fa-folder-open"></i>
+            No service providers registered yet.
+          </div>
+        `;
+        return;
+      }
+
+      providersList.innerHTML = providers.map(p => {
+        const iconClass = skillIcons[p.skill] || 'fa-user-gear';
+        return `
+          <div class="provider-card">
+            <div class="provider-info">
+              <div class="skill-icon-box">
+                <i class="fa-solid ${iconClass}"></i>
+              </div>
+              <div class="provider-details">
+                <h3>${escapeHtml(p.name)}</h3>
+                <div class="provider-meta">
+                  <span><i class="fa-solid fa-phone"></i> ${escapeHtml(p.phone)}</span>
+                  <span><i class="fa-solid fa-briefcase"></i> ${escapeHtml(p.skill)}</span>
+                </div>
+              </div>
+            </div>
+            <div class="city-badge">
+              <i class="fa-solid fa-location-arrow"></i> ${escapeHtml(p.city)}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+    }
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const payload = {
+        name: document.getElementById('name').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        skill: document.getElementById('skill').value,
+        city: document.getElementById('city').value.trim()
+      };
+
+      try {
+        const response = await fetch(`${baseUrl}/api/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Registration failed');
+
+        showToast('Registered successfully!', 'success');
+        registerForm.reset();
+        fetchProviders();
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    });
+
+    // Initial load
+    fetchProviders();
+    // Poll updates every 10 seconds
+    setInterval(fetchProviders, 10000);
+  </script>
+</body>
+</html>
