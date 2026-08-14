@@ -1,5 +1,7 @@
+const path = require('path');
 const fastify = require('fastify')({ logger: false });
 const fastifyPostgres = require('@fastify/postgres');
+const fastifyStatic = require('@fastify/static');
 
 const DB_CONNECTION_STRING = 'postgresql://neondb_owner:npg_E0Ri2lcUIpVw@ep-delicate-base-az7dzspl-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
@@ -8,9 +10,10 @@ fastify.register(fastifyPostgres, {
   connectionString: DB_CONNECTION_STRING
 });
 
-// Root route (simple health check)
-fastify.get('/', async (request, reply) => {
-  return { status: 'OK', service: 'Service Provider API' };
+// Serve static files (HTML UI) from the public folder
+fastify.register(fastifyStatic, {
+  root: path.join(__dirname, 'public'),
+  prefix: '/'
 });
 
 // POST /api/register
